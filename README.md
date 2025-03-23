@@ -24,7 +24,10 @@ extracted from a cell in a GDSII database.
 
 * Create a GDSII database with ```gds_db* db = gds_new(name, &error);```.
 
-* Read in the polygons of a given cell into a pointer vector by ```gds_extract(db, cell_name, target, 1.5, pset, &nskipped)```.
+* Read in the polygons of a given cell into a pointer list by ```gds_extract(db, cell_name, target, 1.5, pset, &nskipped);```. Only polygons that overlap with bounding
+  box `target` are included. Also, in this example, the polygons need to be larger than the resolution `1.5` micron. The number of polygons that are skipped because their size
+  is below `1.5` micron are placed in `nskipped`.
+  The polygons are stored in the list pointed to by `pset`.
 
 * If desired, create a new GDSII file from the extracted polygons with ```gds_write(L"c:\\foo.gds", pset, db->dbunit_in_uu, db->dbunit_in_meter);```.
 
