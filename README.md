@@ -22,7 +22,7 @@ extracted from a cell in a GDSII database.
 
 * An example of its use is given in the `test.c` in the Test folder with further information on the use of each function.
 
-* Create a GDSII database with `gds_db* db = gds_new(name, &error);`.
+* Create a GDSII database with '`gds_db* db = gds_new(name, &error);`'.
 
 * Read in the polygons of a given cell into a pointer vector by `gds_extract(db, cell_name, target, 1.5, pset, &nskipped)`.
 
@@ -45,7 +45,7 @@ typedef struct gds_polygon
 
 	uint16_t layer; // Layer in the GDSII database to which the polygon belongs
 
-	gds_bbox bbox; // Bounding box of the polygon
+	gds_bbox bbox; // Bounding box of the polygon in database units
 } gds_polygon;
 ```
 The `layer` member of the structure identifies the GDS layer number the polygon belongs to.
