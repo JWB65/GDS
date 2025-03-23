@@ -15,7 +15,7 @@ No dependencies except the standard library. Just move all files in the Gds fold
 gds.h
 list.h
 ```
-in your project. A list is a pretty standard dynamic list of void pointers which can use to store general object. In particular here it is used to store the polygons
+in your project. A list is a pretty standard dynamic list of void pointers which can use to store general objects. In particular here it is used to store the polygons
 extracted from a cell in a GDSII database.
 
 # Instructions to use
