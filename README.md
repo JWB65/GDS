@@ -1,6 +1,6 @@
 # GDSII
 
-A simple library for reading and extracting polygons from a GDSII layout databased used in the semiconductor, MEMS, and TFT industries.
+A simple library for reading and extracting polygons from a GDSII layout database used in the semiconductor, MEMS, and TFT industries.
 
 # Features
 
