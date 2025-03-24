@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-typedef struct
+typedef struct gds_pair
 {
 	int64_t x, y;
 } gds_pair;

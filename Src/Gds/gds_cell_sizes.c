@@ -104,7 +104,7 @@ void gds_cell_sizes(gds_db* db)
 {
 	// Calculate cell bounding boxes and output to console
 
-	printf("\nAll cells in database with sizes:\n");
+	printf("\nAll cells in database with width and height in database units:\n");
 
 	for (int i = 0; i < db->cell_list->length; i++)
 	{
