@@ -14,10 +14,12 @@
 
 typedef struct gds_polygon
 {
-	gds_pair* pairs;
-	int npairs;
-	uint16_t layer;
-	gds_bbox bbox;
+	gds_pair* pairs; // Coordinates of vertices in database units
+	int npairs; // Number of coordinates (note GDSII polygons are closed polygons)
+
+	uint16_t layer; // Layer in the GDSII database to which the polygon belongs
+
+	gds_bbox bbox; // Bounding box of the polygon
 } gds_polygon;
 
 typedef struct gds_boundary
