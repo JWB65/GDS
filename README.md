@@ -1,6 +1,6 @@
 # GDSII
 
-A simple library for reading and extracting polygons from a GDSII layout databased used in the semiconductor, MEMS, and TFT industries.
+A simple library for reading and extracting polygons from a GDSII layout database used in the semiconductor, MEMS, and TFT industries.
 
 # Features
 
@@ -15,7 +15,7 @@ No dependencies except the standard library. Just move all files in the Gds fold
 gds.h
 list.h
 ```
-in your project. A list is a pretty standard dynamic list of void pointers which can use to store general object. In particular here it is used to store the polygons
+in your project. A list is a pretty standard dynamic list of void pointers which can use to store general objects. In particular here it is used to store the polygons
 extracted from a cell in a GDSII database.
 
 # Instructions to use
@@ -24,7 +24,10 @@ extracted from a cell in a GDSII database.
 
 * Create a GDSII database with ```gds_db* db = gds_new(name, &error);```.
 
-* Read in the polygons of a given cell into a pointer vector by ```gds_extract(db, cell_name, target, 1.5, pset, &nskipped)```.
+* Read in the polygons of a given cell into a pointer list by ```gds_extract(db, cell_name, target, 1.5, pset, &nskipped);```. Only polygons that overlap with bounding
+  box `target` are included. Also, in this example, the polygons need to be larger than the resolution `1.5` micron. The number of polygons that are skipped because their size
+  is below `1.5` micron are placed in `nskipped`.
+  The polygons are stored in the list pointed to by `pset`.
 
 * If desired, create a new GDSII file from the extracted polygons with ```gds_write(L"c:\\foo.gds", pset, db->dbunit_in_uu, db->dbunit_in_meter);```.
 
