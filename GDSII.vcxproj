@@ -127,26 +127,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Src\Gds\gds.c" />
-    <ClCompile Include="Src\Gds\gds_bbox.c" />
-    <ClCompile Include="Src\Gds\gds_cell.c" />
-    <ClCompile Include="Src\Gds\gds_cell_sizes.c" />
-    <ClCompile Include="Src\Gds\gds_expand_path.c" />
-    <ClCompile Include="Src\Gds\gds_extract.c" />
-    <ClCompile Include="Src\Gds\gds_print_polys.c" />
-    <ClCompile Include="Src\Gds\gds_transform.c" />
-    <ClCompile Include="Src\Gds\gds_write.c" />
-    <ClCompile Include="Src\List\list.c" />
-    <ClCompile Include="Src\Test\test.c" />
+    <ClCompile Include="Gds\gds.c" />
+    <ClCompile Include="Gds\gds_bbox.c" />
+    <ClCompile Include="Gds\gds_cell.c" />
+    <ClCompile Include="Gds\gds_cell_sizes.c" />
+    <ClCompile Include="Gds\gds_expand_path.c" />
+    <ClCompile Include="Gds\gds_extract.c" />
+    <ClCompile Include="Gds\gds_print_polys.c" />
+    <ClCompile Include="Gds\gds_transform.c" />
+    <ClCompile Include="Gds\gds_write.c" />
+    <ClCompile Include="Test\test.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Src\Gds\gds.h" />
-    <ClInclude Include="Src\Gds\gds_bbox.h" />
-    <ClInclude Include="Src\Gds\gds_errors.h" />
-    <ClInclude Include="Src\Gds\gds_pair.h" />
-    <ClInclude Include="Src\Gds\gds_records.h" />
-    <ClInclude Include="Src\Gds\gds_transform.h" />
-    <ClInclude Include="Src\List\list.h" />
+    <ClInclude Include="Gds\gds.h" />
+    <ClInclude Include="Gds\gds_bbox.h" />
+    <ClInclude Include="Gds\gds_errors.h" />
+    <ClInclude Include="Gds\gds_pair.h" />
+    <ClInclude Include="Gds\gds_records.h" />
+    <ClInclude Include="Gds\gds_transform.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
