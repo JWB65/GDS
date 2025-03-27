@@ -36,7 +36,7 @@ extracted from a cell in a GDSII database.
 The polygon structure `gds_polygon` is just an array of pairs with an integer specifying the layer number in the GDSII database.
 
 ```
-typedef struct
+typedef struct gds_pair
 {
 	int64_t x, y;
 } gds_pair;
