@@ -67,6 +67,6 @@ public:
 	std::vector<gds_sref*> *srefs;
 	std::vector<gds_aref*> *arefs;
 
-	gds_bbox bbox; /* Is recursively calculated after loading the database */
-	bool initialized; /* Is set true when member @bbox is initialized */
+	gds_bbox bbox; // Is recursively calculated after loading the database
+	bool initialized; // Is set true when member @bbox is initialized
 };

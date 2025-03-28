@@ -10,16 +10,6 @@
 #include <stdio.h>
 #include <string.h>
 
-// Defined in gds_expand_path.c
-int gds_expand_path(gds_pair* out, const gds_pair* in, int npairs_in, uint32_t width, uint16_t pathtype);
-
-// Defined in gds_cell_sizes.c
-void gds_cell_sizes(gds_db* db);
-
-// Defined in gds_cell.c
-//gds_cell* cell_new();
-//void cell_delete(gds_cell* cell);
-
 static
 double buffer_to_double(unsigned char* p)
 {
@@ -121,7 +111,7 @@ void double_to_buffer(double value, uint8_t* buf)
 }
 
 static
-gds_error read_cells(gds_db* db, const wchar_t* file)
+int read_cells(gds_db* db, const wchar_t* file)
 {
 	FILE* fp;
 	_wfopen_s(&fp, file, L"rb");
@@ -194,13 +184,11 @@ gds_error read_cells(gds_db* db, const wchar_t* file)
 				if (active_cell != NULL)
 					return ERR_ILLEGAL_BGNSTR;
 
-				//active_cell = cell_new();
 				active_cell = new gds_cell;
 
 				// Ensure the pointer to the cell is registered already so no memory leaks when
 				// an error is found
 				db->cell_list.push_back(active_cell);
-				//list_append(db->cell_list, active_cell);
 
 				break;
 			}
@@ -232,8 +220,6 @@ gds_error read_cells(gds_db* db, const wchar_t* file)
 				strncpy(active_cell->name, (char*) buf, buf_size);
 				active_cell->name[buf_size] = '\0';
 
-				//printf("Reading cell %s\n", active_cell->name);
-
 				break;
 			}
 			case BOUNDARY:
@@ -242,7 +228,7 @@ gds_error read_cells(gds_db* db, const wchar_t* file)
 					return ERR_ILLEGAL_BOUNDARY;
 
 				active_elem = calloc(1, sizeof(gds_boundary));
-				//list_append(active_cell->boundaries, active_elem);
+
 				active_cell->boundaries->push_back((gds_boundary*)active_elem);
 
 				curElem = EL_BOUNDARY;
@@ -255,7 +241,7 @@ gds_error read_cells(gds_db* db, const wchar_t* file)
 					return ERR_ILLEGAL_PATH;
 
 				active_elem = calloc(1, sizeof(gds_path));
-				//list_append(active_cell->paths, active_elem);
+
 				active_cell->paths->push_back((gds_path*)active_elem);
 
 				curElem = EL_PATH;
@@ -268,7 +254,7 @@ gds_error read_cells(gds_db* db, const wchar_t* file)
 					return ERR_ILLEGAL_SREF;
 
 				active_elem = calloc(1, sizeof(gds_sref));
-				//list_append(active_cell->srefs, active_elem);
+
 				active_cell->srefs->push_back((gds_sref*)active_elem);
 
 				gds_sref* tmp = (gds_sref*)active_elem;
@@ -284,7 +270,7 @@ gds_error read_cells(gds_db* db, const wchar_t* file)
 					return ERR_ILLEGAL_AREF;
 
 				active_elem = calloc(1, sizeof(gds_aref));
-				//list_append(active_cell->arefs, active_elem);
+
 				active_cell->arefs->push_back((gds_aref*)active_elem);
 
 				gds_aref* tmp = (gds_aref*)active_elem;
@@ -563,8 +549,10 @@ gds_error read_cells(gds_db* db, const wchar_t* file)
 
 	fclose(fp);
 
+	//
 	// Make sure all referenced cell names exist and assign cell pointers
-	//for (int i = 0; i < db->cell_list.size(); i++)
+	//
+
 	for (gds_cell* cell : db->cell_list)
 	{
 		//gds_cell* cell = db->cell_list[i];
@@ -606,6 +594,7 @@ gds_db::gds_db(const wchar_t* file, int* error)
 	version = 0;
 	*error = read_cells(this, file);
 
+	// Determine the size of each cell
 	gds_cell_sizes(this);
 }
 

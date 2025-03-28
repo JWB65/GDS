@@ -132,11 +132,12 @@
     <ClCompile Include="Gds\CellSizes.cpp" />
     <ClCompile Include="Gds\ExpandPath.cpp" />
     <ClCompile Include="Gds\Extract.cpp" />
+    <ClCompile Include="Gds\FindCell.cpp" />
     <ClCompile Include="Gds\Gds.cpp" />
     <ClCompile Include="Gds\Polyset.cpp" />
     <ClCompile Include="Gds\Transform.cpp" />
     <ClCompile Include="Gds\Write.cpp" />
-    <ClCompile Include="Test\test.cpp" />
+    <ClCompile Include="Test\Test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Gds\BBox.h" />

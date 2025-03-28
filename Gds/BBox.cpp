@@ -8,7 +8,7 @@ int64_t min(int64_t const x, int64_t const y)
 
 void bbox_init(gds_bbox* self)
 {
-	*self ={INT32_MAX, INT32_MAX, INT32_MIN, INT32_MIN};
+	*self = {INT32_MAX, INT32_MAX, INT32_MIN, INT32_MIN};
 }
 
 uint64_t bbox_size(const gds_bbox* target)
@@ -35,23 +35,22 @@ void bbox_fit_points(gds_bbox* self, const gds_pair* pairs, int npairs)
 {
 	// Adjust the size of a bounding box to fit a array of pairs
 
-	for (int i = 0; i < npairs; ++i)
-	{
+	for (int i = 0; i < npairs; ++i) {
 		bbox_fit_point(self, pairs[i]);
 	}
 }
 
 void bbox_fit_bbox(gds_bbox* self, const gds_bbox* other)
 {
-	bbox_fit_point(self, { other->xmin, other->ymin });
-	bbox_fit_point(self, { other->xmin, other->ymax });
-	bbox_fit_point(self, { other->xmax, other->ymax });
-	bbox_fit_point(self, { other->xmax, other->ymin });
+	bbox_fit_point(self, {other->xmin, other->ymin});
+	bbox_fit_point(self, {other->xmin, other->ymax});
+	bbox_fit_point(self, {other->xmax, other->ymax});
+	bbox_fit_point(self, {other->xmax, other->ymin});
 }
 
 bool bbox_check_overlap(const gds_bbox* b, const gds_bbox* a)
 {
-	/* Check if there's *possible* overlap between two bounding boxes */
+	// Check if there's *possible* overlap between two bounding boxes
 
 	bool overlap = (a->xmin < b->xmax) && (a->xmax > b->xmin) && (a->ymax > b->ymin) && (a->ymin <
 		b->ymax);

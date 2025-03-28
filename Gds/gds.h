@@ -35,10 +35,13 @@ public:
 	~gds_db();
 };
 
+// Defined in gds_expand_path.c
+int gds_expand_path(gds_pair* out, const gds_pair* in, int npairs_in, uint32_t width, uint16_t pathtype);
 
-/*
-	Find the pointer to cell with name @sname
- */
+// Defined in CellSizes.c
+void gds_cell_sizes(gds_db* db);
+
+// Find the pointer to cell with name @sname
 gds_cell* find_cell(gds_db* db, const char* name);
 
 /*

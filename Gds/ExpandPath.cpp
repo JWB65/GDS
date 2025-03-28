@@ -5,19 +5,18 @@
 #include <stdlib.h>
 
 /* Line pair standard form ax + by = c */
-typedef struct
-{
+typedef struct {
 	double a, b, c;
 } Line;
 
-static bool
-test_lines_parallel(Line line1, Line line2)
+static
+bool test_lines_parallel(Line line1, Line line2)
 {
 	return ((line1.a * line2.b - line2.a * line1.b) == 0.);
 }
 
-static gds_pair
-intersect_lines(Line line1, Line line2)
+static
+gds_pair intersect_lines(Line line1, Line line2)
 {
 	// Line-Line intersection (homogeneous coordinates):
 	// (B1C2 - B2C1, A2C1 - A1C2, A1B2 - A2B1)
@@ -31,11 +30,11 @@ intersect_lines(Line line1, Line line2)
 	double x = (line1.b * line2.c - line2.b * line1.c) / w;
 	double y = (line2.a * line1.c - line1.a * line2.c) / w;
 
-	return { (int)x, (int)y };
+	return {(int)x, (int)y};
 }
 
-static gds_pair
-project(gds_pair p, Line line)
+static
+gds_pair project(gds_pair p, Line line)
 {
 	// normal to Ax + By + C = 0 through (x1, y1)
 	// A'x + B'y + C' = 0 with
@@ -51,8 +50,8 @@ project(gds_pair p, Line line)
 	return intersect_lines(line, normal);
 }
 
-static gds_pair
-extend(gds_pair tail, gds_pair head, double length)
+static
+gds_pair extend(gds_pair tail, gds_pair head, double length)
 {
 	// Extends a vector given by @tail and @head pair the tail direction by@length
 
@@ -63,8 +62,7 @@ extend(gds_pair tail, gds_pair head, double length)
 	segy = (double)(tail.y - head.y);
 	norm = sqrt(segx * segx + segy * segy);
 
-	if (norm != 0.0)
-	{
+	if (norm != 0.0) {
 		out.x = tail.x + (int)((length / norm) * segx);
 		out.y = tail.y + (int)((length / norm) * segy);
 	}
@@ -72,15 +70,14 @@ extend(gds_pair tail, gds_pair head, double length)
 	return out;
 }
 
-int
-gds_expand_path(gds_pair* out, const gds_pair* in, int npairs_in, uint32_t width, uint16_t pathtype)
+int gds_expand_path(gds_pair* out, const gds_pair* in, int npairs_in, uint32_t width, uint16_t pathtype)
 {
 	// Expands a GDS path and outputs as array of pairs. @out needs to be allocated with 2 * @ninpairs + 1 pairs by caller.
 
 	// Path type 1:
 
 	/*
-	      O             O
+		  O             O
 
 
 		  C             C
@@ -97,8 +94,7 @@ gds_expand_path(gds_pair* out, const gds_pair* in, int npairs_in, uint32_t width
 	Line* mlines = (Line*)malloc((npairs_in - 1) * sizeof(Line));
 	Line* plines = (Line*)malloc((npairs_in - 1) * sizeof(Line));
 
-	for (int i = 0; i < npairs_in - 1; i++)
-	{
+	for (int i = 0; i < npairs_in - 1; i++) {
 		double a, b, c, c_trans;
 
 		// Line through (x1, y1) & (x2, y2)
@@ -111,8 +107,7 @@ gds_expand_path(gds_pair* out, const gds_pair* in, int npairs_in, uint32_t width
 		b = -(double)(in[i + 1].x - in[i].x);
 
 		// Return failure if the two ends of the segment coincide
-		if (a == 0. && b == 0.)
-		{
+		if (a == 0. && b == 0.) {
 			free(plines);
 			free(mlines);
 			return EXIT_FAILURE;
@@ -134,19 +129,16 @@ gds_expand_path(gds_pair* out, const gds_pair* in, int npairs_in, uint32_t width
 	// Head points
 
 	gds_pair end_point;
-	if (pathtype == 2)
-	{
+	if (pathtype == 2) {
 		if (in[0].x != in[1].x || in[0].x != in[1].y)
 			end_point = extend(in[0], in[1], hwidth);
-		else
-		{
+		else {
 			// The two coordinates are the same: can not extend
 			free(plines);
 			free(mlines);
 			return EXIT_FAILURE;
 		}
-	} else
-	{
+	} else {
 		end_point = in[0];
 	}
 	out[0] = project(end_point, plines[0]);
@@ -155,17 +147,14 @@ gds_expand_path(gds_pair* out, const gds_pair* in, int npairs_in, uint32_t width
 
 	// Middle points
 
-	for (int i = 1; i < npairs_in - 1; ++i)
-	{
+	for (int i = 1; i < npairs_in - 1; ++i) {
 		bool result = !test_lines_parallel(plines[i - 1], plines[i]) &&
 			!test_lines_parallel(mlines[i - 1], mlines[i]);
 
-		if (result)
-		{
+		if (result) {
 			out[i] = intersect_lines(plines[i - 1], plines[i]);
 			out[2 * npairs_in - 1 - i] = intersect_lines(mlines[i - 1], mlines[i]);
-		} else
-		{
+		} else {
 			free(plines);
 			free(mlines);
 			return EXIT_FAILURE;
@@ -174,19 +163,16 @@ gds_expand_path(gds_pair* out, const gds_pair* in, int npairs_in, uint32_t width
 
 	// Tail points
 
-	if (pathtype == 2)
-	{
+	if (pathtype == 2) {
 		if (in[npairs_in - 1].x != in[npairs_in - 2].x || in[npairs_in - 1].x != in[npairs_in - 2].y)
 			end_point = extend(in[npairs_in - 1], in[npairs_in - 2], hwidth);
-		else
-		{
+		else {
 			// The two coordinates are the same: can not extend
 			free(plines);
 			free(mlines);
 			return EXIT_FAILURE;
 		}
-	} else
-	{
+	} else {
 		end_point = in[npairs_in - 1];
 	}
 	out[npairs_in - 1] = project(end_point, plines[npairs_in - 2]);

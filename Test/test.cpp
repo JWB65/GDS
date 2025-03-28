@@ -16,7 +16,9 @@ int main()
 
 	if (result != ERR_SUCCESS) {
 		printf("\nError %d found while opening GDS database\n", result);
+
 		delete db;
+		db = NULL;
 
 		return 1;
 	}
@@ -37,7 +39,7 @@ int main()
 	int64_t x_max = (int64_t)((-23441 + 48) / factor);
 	int64_t y_max = (int64_t)((17292 + 48) / factor);
 
-	gds_bbox target = {x_min, x_max, y_min, y_max};
+	gds_bbox target = {x_min, y_min, x_max, y_max};
 
 	// The resolution (min polygon size to include) also has to be converted in database units
 	int64_t resolution = (int64_t) (1.5 / factor);
@@ -58,7 +60,6 @@ int main()
 		delete pset;
 		pset = NULL;
 	}
-
 
 	//
 	// Write the polygons to a new GDS file

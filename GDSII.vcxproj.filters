@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Test\test.cpp">
+    <ClCompile Include="Test\Test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Gds\Transform.cpp">
@@ -43,6 +43,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Gds\Polyset.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Gds\FindCell.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -17,20 +17,6 @@ typedef struct ExtractionInfo
 	char* error;
 } ExtractionInfo;
 
-gds_cell* find_cell(gds_db* db, const char* name)
-{
-	/* Returns pointer cell with name @name in gds database @db or NULL if not found */
-
-	for (int i = 0; i < db->cell_list.size(); i++)
-	{
-		gds_cell* cell = db->cell_list[i];
-		if (strcmp(cell->name, name) == 0)
-			return cell;
-	}
-
-	return NULL;
-}
-
 static
 void add_poly(gds_polyset* pset, gds_pair* pairs, int npairs, uint16_t layer, gds_bbox* box, gds_transform* tra)
 {
