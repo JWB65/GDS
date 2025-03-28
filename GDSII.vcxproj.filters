@@ -15,54 +15,60 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Test\test.c">
+    <ClCompile Include="Test\test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Gds\gds_expand_path.c">
+    <ClCompile Include="Gds\Transform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Gds\gds_extract.c">
+    <ClCompile Include="Gds\Write.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Gds\gds_print_polys.c">
+    <ClCompile Include="Gds\BBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Gds\gds_transform.c">
+    <ClCompile Include="Gds\Cell.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Gds\gds_write.c">
+    <ClCompile Include="Gds\CellSizes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Gds\gds.c">
+    <ClCompile Include="Gds\ExpandPath.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Gds\gds_bbox.c">
+    <ClCompile Include="Gds\Extract.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Gds\gds_cell.c">
+    <ClCompile Include="Gds\Gds.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Gds\gds_cell_sizes.c">
+    <ClCompile Include="Gds\Polyset.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Gds\gds_pair.h">
+    <ClInclude Include="Gds\Polyset.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Gds\gds_records.h">
+    <ClInclude Include="Gds\Records.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Gds\gds_transform.h">
+    <ClInclude Include="Gds\Transform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Gds\gds.h">
+    <ClInclude Include="Gds\BBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Gds\gds_bbox.h">
+    <ClInclude Include="Gds\Cell.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Gds\gds_errors.h">
+    <ClInclude Include="Gds\Errors.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Gds\Gds.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Gds\Pair.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

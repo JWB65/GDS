@@ -1,7 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 
-#include "gds.h"
-#include "gds_records.h"
+#include "Gds.h"
+#include "Records.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -17,10 +17,11 @@ int gds_expand_path(gds_pair* out, const gds_pair* in, int npairs_in, uint32_t w
 void gds_cell_sizes(gds_db* db);
 
 // Defined in gds_cell.c
-gds_cell* cell_new();
-void cell_delete(gds_cell* cell);
+//gds_cell* cell_new();
+//void cell_delete(gds_cell* cell);
 
-static double buffer_to_double(unsigned char* p)
+static
+double buffer_to_double(unsigned char* p)
 {
 	int i, sign, exp;
 	double fraction;
@@ -62,7 +63,8 @@ static double buffer_to_double(unsigned char* p)
 	return (pow(16, exp) * sign * fraction);
 }
 
-static void swap_big_endian(uint64_t* buf, uint64_t n)
+static
+void swap_big_endian(uint64_t* buf, uint64_t n)
 {
 	while (n > 0)
 	{
@@ -76,7 +78,8 @@ static void swap_big_endian(uint64_t* buf, uint64_t n)
 	};
 }
 
-static void double_to_buffer(double value, uint8_t* buf)
+static
+void double_to_buffer(double value, uint8_t* buf)
 {
 	// Write a GDS 8 byte double to a 8 byte buffer in floating point format of GDSII
 	// 8 bytes of memory need to be reserved for @buf
@@ -105,7 +108,7 @@ static void double_to_buffer(double value, uint8_t* buf)
 	{
 		uint8_t a[8];
 		uint64_t b;
-	} tmp = {.b = 0};
+	} tmp = {0};
 
 	tmp.b = ((uint64_t)left_byte << 56) | (mantissa & 0x00FFFFFFFFFFFFFF);
 
@@ -117,7 +120,8 @@ static void double_to_buffer(double value, uint8_t* buf)
 	}
 }
 
-static gds_error read_cells(gds_db* db, const wchar_t* file)
+static
+gds_error read_cells(gds_db* db, const wchar_t* file)
 {
 	FILE* fp;
 	_wfopen_s(&fp, file, L"rb");
@@ -135,7 +139,7 @@ static gds_error read_cells(gds_db* db, const wchar_t* file)
 	void* active_elem = NULL;
 
 	// Variable to track the type of element currently being read
-	enum Elem curElem = EL_NONE;
+	enum ElemType curElem = EL_NONE;
 
 	// Variable to track if the ENDLIB record was read
 	bool endlib = false; 
@@ -163,7 +167,7 @@ static gds_error read_cells(gds_db* db, const wchar_t* file)
 		unsigned char* buf = NULL;
 		if (buf_size > 0)
 		{
-			buf = malloc(buf_size * sizeof(*buf));
+			buf = (unsigned char*) malloc(buf_size * sizeof(*buf));
 			bytes_read += fread(buf, 1, buf_size, fp);
 		}
 
@@ -190,11 +194,13 @@ static gds_error read_cells(gds_db* db, const wchar_t* file)
 				if (active_cell != NULL)
 					return ERR_ILLEGAL_BGNSTR;
 
-				active_cell = cell_new();
+				//active_cell = cell_new();
+				active_cell = new gds_cell;
 
 				// Ensure the pointer to the cell is registered already so no memory leaks when
 				// an error is found
-				list_append(db->cell_list, active_cell);
+				db->cell_list.push_back(active_cell);
+				//list_append(db->cell_list, active_cell);
 
 				break;
 			}
@@ -223,7 +229,7 @@ static gds_error read_cells(gds_db* db, const wchar_t* file)
 				if (active_cell == NULL || buf_size > GDS_MAX_CELL_NAME)
 					return ERR_ILLEGAL_STRNAME;
 
-				strncpy(active_cell->name, buf, buf_size);
+				strncpy(active_cell->name, (char*) buf, buf_size);
 				active_cell->name[buf_size] = '\0';
 
 				//printf("Reading cell %s\n", active_cell->name);
@@ -236,7 +242,8 @@ static gds_error read_cells(gds_db* db, const wchar_t* file)
 					return ERR_ILLEGAL_BOUNDARY;
 
 				active_elem = calloc(1, sizeof(gds_boundary));
-				list_append(active_cell->boundaries, active_elem);
+				//list_append(active_cell->boundaries, active_elem);
+				active_cell->boundaries->push_back((gds_boundary*)active_elem);
 
 				curElem = EL_BOUNDARY;
 
@@ -248,7 +255,8 @@ static gds_error read_cells(gds_db* db, const wchar_t* file)
 					return ERR_ILLEGAL_PATH;
 
 				active_elem = calloc(1, sizeof(gds_path));
-				list_append(active_cell->paths, active_elem);
+				//list_append(active_cell->paths, active_elem);
+				active_cell->paths->push_back((gds_path*)active_elem);
 
 				curElem = EL_PATH;
 
@@ -260,7 +268,8 @@ static gds_error read_cells(gds_db* db, const wchar_t* file)
 					return ERR_ILLEGAL_SREF;
 
 				active_elem = calloc(1, sizeof(gds_sref));
-				list_append(active_cell->srefs, active_elem);
+				//list_append(active_cell->srefs, active_elem);
+				active_cell->srefs->push_back((gds_sref*)active_elem);
 
 				gds_sref* tmp = (gds_sref*)active_elem;
 				tmp->mag = 1.0f;
@@ -275,7 +284,8 @@ static gds_error read_cells(gds_db* db, const wchar_t* file)
 					return ERR_ILLEGAL_AREF;
 
 				active_elem = calloc(1, sizeof(gds_aref));
-				list_append(active_cell->arefs, active_elem);
+				//list_append(active_cell->arefs, active_elem);
+				active_cell->arefs->push_back((gds_aref*)active_elem);
 
 				gds_aref* tmp = (gds_aref*)active_elem;
 				tmp->mag = 1.0f;
@@ -317,7 +327,7 @@ static gds_error read_cells(gds_db* db, const wchar_t* file)
 						gds_path* p = (gds_path*)active_elem;
 
 						p->nepairs = 2 * p->npairs + 1;
-						p->epairs = malloc(p->nepairs * sizeof(gds_pair));
+						p->epairs = (gds_pair*) malloc(p->nepairs * sizeof(gds_pair));
 
 						int result = gds_expand_path(p->epairs, p->pairs, p->npairs, p->width,
 							p->pathtype);
@@ -346,13 +356,13 @@ static gds_error read_cells(gds_db* db, const wchar_t* file)
 				{
 					case EL_SREF:
 					{
-						strncpy(((gds_sref*)active_elem)->sname, buf, buf_size);
+						strncpy(((gds_sref*)active_elem)->sname, (char*) buf, buf_size);
 						((gds_sref*)active_elem)->sname[buf_size] = '\0';
 						break;
 					}
 					case EL_AREF:
 					{
-						strncpy(((gds_aref*)active_elem)->sname, buf, buf_size);
+						strncpy(((gds_aref*)active_elem)->sname, (char*) buf, buf_size);
 						((gds_aref*)active_elem)->sname[buf_size] = '\0';
 						break;
 					}
@@ -452,13 +462,13 @@ static gds_error read_cells(gds_db* db, const wchar_t* file)
 				{
 					case EL_BOUNDARY:
 					{
-						((gds_boundary*)active_elem)->pairs = malloc(count * sizeof(gds_pair));
+						((gds_boundary*)active_elem)->pairs = (gds_pair*) malloc(count * sizeof(gds_pair));
 						((gds_boundary*)active_elem)->npairs = count;
 						break;
 					}
 					case EL_PATH:
 					{
-						((gds_path*)active_elem)->pairs = malloc(count * sizeof(gds_pair));
+						((gds_path*)active_elem)->pairs = (gds_pair*) malloc(count * sizeof(gds_pair));
 						((gds_path*)active_elem)->npairs = count;
 						break;
 					}
@@ -480,16 +490,16 @@ static gds_error read_cells(gds_db* db, const wchar_t* file)
 					switch (curElem)
 					{
 						case EL_BOUNDARY:
-							((gds_boundary*)active_elem)->pairs[n] = (gds_pair) {x, y};
+							((gds_boundary*)active_elem)->pairs[n] = {x, y};
 							break;
 						case EL_PATH:
-							((gds_path*)active_elem)->pairs[n] = (gds_pair) {x, y};
+							((gds_path*)active_elem)->pairs[n] = {x, y};
 							break;
 						case EL_SREF:
-							((gds_sref*)active_elem)->origin = (gds_pair) {x, y};
+							((gds_sref*)active_elem)->origin = {x, y};
 							break;
 						case EL_AREF:
-							((gds_aref*)active_elem)->vectors[n] = (gds_pair) {x, y};
+							((gds_aref*)active_elem)->vectors[n] = {x, y};
 							break;
 					}
 				}
@@ -554,14 +564,13 @@ static gds_error read_cells(gds_db* db, const wchar_t* file)
 	fclose(fp);
 
 	// Make sure all referenced cell names exist and assign cell pointers
-	for (int i = 0; i < db->cell_list->length; i++)
+	//for (int i = 0; i < db->cell_list.size(); i++)
+	for (gds_cell* cell : db->cell_list)
 	{
-		gds_cell* cell = list_at(db->cell_list, i);
+		//gds_cell* cell = db->cell_list[i];
 
-		for (int j = 0; j < cell->srefs->length; j++)
+		for (gds_sref* sref : *cell->srefs)
 		{
-			gds_sref* sref = list_at(cell->srefs, j);
-
 			// Continue if this reference already has the cell pointer determined
 			if (sref->cell != NULL)
 				continue;
@@ -572,9 +581,8 @@ static gds_error read_cells(gds_db* db, const wchar_t* file)
 				return ERR_CELL_NAME_NOT_FOUND;
 		}
 
-		for (int j = 0; j < cell->arefs->length; j++)
+		for (gds_aref* aref : *cell->arefs)
 		{
-			gds_aref* aref = list_at(cell->arefs, j);
 
 			// Continue if this reference already has the cell pointer determined
 			if (aref->cell)
@@ -590,38 +598,22 @@ static gds_error read_cells(gds_db* db, const wchar_t* file)
 	return ERR_SUCCESS;
 }
 
-gds_db* gds_new(const wchar_t* file, int* error)
+
+gds_db::gds_db(const wchar_t* file, int* error)
 {
-	gds_db* db = calloc(1, sizeof(gds_db));
-	db->cell_list = list_new();
+	dbunit_in_meter = 0.;
+	dbunit_in_uu = 0.;
+	version = 0;
+	*error = read_cells(this, file);
 
-	// Read the GDS file and if successful determine the sizes for each cell
-
-	*error = read_cells(db, file);
-
-	if (*error == ERR_SUCCESS)
-	{
-		gds_cell_sizes(db);
-	}
-	else
-	{
-		gds_delete(db);
-		db = NULL;
-	}
-
-	return db;
+	gds_cell_sizes(this);
 }
 
-void gds_delete(gds_db* db)
+gds_db::~gds_db()
 {
-	for (int i = 0; i < db->cell_list->length; i++)
+	for (gds_cell* cell : cell_list)
 	{
-		gds_cell* cell = list_at(db->cell_list, i);
-		cell_delete(cell);
+		delete cell;
+		cell = NULL;
 	}
-
-	list_delete(db->cell_list);
-	db->cell_list = NULL;
-
-	free(db);
 }

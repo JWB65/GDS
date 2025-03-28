@@ -1,4 +1,4 @@
-#include "gds_transform.h"
+#include "Transform.h"
 
 #include <assert.h>
 #include <math.h>
@@ -9,13 +9,13 @@
 static gds_pair
 AddPairs(gds_pair one, gds_pair two)
 {
-	return (gds_pair) {one.x + two.x, one.y + two.y};
+	return {one.x + two.x, one.y + two.y};
 }
 
 static gds_pair
 SubtractPairs(gds_pair one, gds_pair two)
 {
-	return (gds_pair) {one.x - two.x, one.y - two.y};
+	return {one.x - two.x, one.y - two.y};
 }
 
 static gds_pair
@@ -31,7 +31,7 @@ RotatePair(const gds_pair in, double angle, double mag, bool Rx)
 
 	//assert(std::in_range<int32_t>(x) && std::in_range<int32_t>(y)); // They need to be in the GDSII database range of 4 byte signed integers
 
-	return (gds_pair) { x, y };
+	return { x, y };
 }
 
 gds_pair

@@ -10,7 +10,7 @@
 
 typedef struct ExtractionInfo
 {
-	List* pset;
+	gds_polyset* pset;
 	gds_bbox target;
 	int64_t resolution;
 	int64_t nskipped;
@@ -21,9 +21,9 @@ gds_cell* find_cell(gds_db* db, const char* name)
 {
 	/* Returns pointer cell with name @name in gds database @db or NULL if not found */
 
-	for (int i = 0; i < db->cell_list->length; i++)
+	for (int i = 0; i < db->cell_list.size(); i++)
 	{
-		gds_cell* cell = list_at(db->cell_list, i);
+		gds_cell* cell = db->cell_list[i];
 		if (strcmp(cell->name, name) == 0)
 			return cell;
 	}
@@ -32,29 +32,24 @@ gds_cell* find_cell(gds_db* db, const char* name)
 }
 
 static
-void add_poly(List* pset, gds_pair* pairs, int npairs, uint16_t layer, gds_bbox* box, gds_transform* tra)
+void add_poly(gds_polyset* pset, gds_pair* pairs, int npairs, uint16_t layer, gds_bbox* box, gds_transform* tra)
 {
-	gds_polygon* poly = malloc(sizeof(gds_polygon));
-	list_append(pset, poly);
+	//gds_polygon* poly = (gds_polygon *) malloc(sizeof(gds_polygon));
 
-	poly->pairs = malloc(npairs * sizeof(gds_pair));
-	transform_pairs(poly->pairs, pairs, npairs, tra, false);
-	poly->npairs = npairs;
+	//gds_pair* pairs = (gds_pair*)malloc(npairs * sizeof(gds_pair));
+	gds_pair* transformed_pairs = new gds_pair[npairs];
+	transform_pairs(transformed_pairs, pairs, npairs, tra, false);
 
-	// We already calculated the bounding box
-	poly->bbox = *box;
+	gds_polygon* poly = new gds_polygon(transformed_pairs, npairs, *box, layer);
 
-	// Add the layer number
-	poly->layer = layer;
-
+	pset->push_back(poly);
 }
 
 static
 void extract(ExtractionInfo* info, gds_cell* cell, gds_transform transform, int level)
 {
-	for (int i = 0; i < cell->boundaries->length; i++)
+	for (gds_boundary* b : *cell->boundaries)
 	{
-		gds_boundary* b = list_at(cell->boundaries, i);
 		gds_bbox b_bbox = bbox_transform(&b->bbox, &transform, false);
 
 		if (bbox_check_overlap(&b_bbox, &info->target))
@@ -73,17 +68,17 @@ void extract(ExtractionInfo* info, gds_cell* cell, gds_transform transform, int 
 			}
 
 			// Check if the number of polygons is overflowing
-			if (info->pset->length >= GDS_MAX_POLYS)
+			if (info->pset->size() >= GDS_MAX_POLYS)
 			{
-				info->error = "Reached maximum allowed number of polygons";
+				info->error = (char*)"Reached maximum allowed number of polygons";
 				return;
 			}
 		}
 	}
 
-	for (int i = 0; i < cell->paths->length; i++)
+	for (gds_path* p : *cell->paths)
 	{
-		gds_boundary* p = list_at(cell->paths, i);
+		//gds_path* p = (gds_path*)cell->paths[i];
 		gds_bbox bbox = bbox_transform(&p->bbox, &transform, false);
 
 		if (bbox_check_overlap(&bbox, &info->target))
@@ -102,19 +97,17 @@ void extract(ExtractionInfo* info, gds_cell* cell, gds_transform transform, int 
 			}
 
 			// Check if the number of polygons is overflowing
-			if (info->pset->length >= GDS_MAX_POLYS)
+			if (info->pset->size() >= GDS_MAX_POLYS)
 			{
-				info->error = "Reached maximum allowed number of polygons";
+				info->error = (char *) "Reached maximum allowed number of polygons";
 				return;
 			}
 		}
 	}
 
 	// Scan through the SREF elements
-	for (int i = 0; i < cell->srefs->length; i++)
+	for (gds_sref* sref : *cell->srefs)
 	{
-		gds_sref* sref = list_at(cell->srefs, i);
-
 		gds_transform acc;
 		acc.translation = transform_pair(sref->origin, &transform, false);
 		acc.magnification = transform.magnification * sref->mag;
@@ -135,10 +128,8 @@ void extract(ExtractionInfo* info, gds_cell* cell, gds_transform transform, int 
 	}
 
 	// Scan through the AREF elements
-	for (int i = 0; i < cell->arefs->length; i++)
+	for (gds_aref* aref : *cell->arefs)
 	{
-		gds_aref* aref = list_at(cell->arefs, i);
-
 		double v_col_x, v_col_y, v_row_x, v_row_y;
 
 		int64_t x1 = aref->vectors[0].x;
@@ -167,7 +158,7 @@ void extract(ExtractionInfo* info, gds_cell* cell, gds_transform transform, int 
 				int64_t y_ref = (int64_t)(y1 + c * v_col_y + r * v_row_y);
 
 				gds_transform acc;
-				acc.translation = transform_pair((gds_pair) { x_ref, y_ref }, & transform, false);
+				acc.translation = transform_pair({ x_ref, y_ref }, & transform, false);
 				acc.magnification = transform.magnification * aref->mag;
 				acc.angle = transform.angle + aref->angle;
 				acc.mirror = transform.mirror ^ (aref->strans & 0x8000);
@@ -188,7 +179,7 @@ void extract(ExtractionInfo* info, gds_cell* cell, gds_transform transform, int 
 	}
 }
 
-gds_error gds_extract(gds_db* db, const char* cell_name, gds_bbox target, double resolution, List* pset,
+int gds_extract(gds_db* db, const char* cell_name, gds_bbox target, int64_t resolution, gds_polyset* pset,
 	int64_t* nskipped)
 {
 	// Find the pointer to the structure to expand
@@ -202,23 +193,24 @@ gds_error gds_extract(gds_db* db, const char* cell_name, gds_bbox target, double
 		return ERR_CELL_NAME_NOT_FOUND;
 	}
 
-	ExtractionInfo info = {.pset = pset, .nskipped = 0, .error = NULL};
+	ExtractionInfo info;
 
-	double dbunit_in_um = 1E6 * db->dbunit_in_meter;
+	info.pset = pset;
+	info.nskipped = 0;
+	info.error = NULL;
+
+	//double dbunit_in_um = 1E6 * db->dbunit_in_meter;
 
 	// Convert the target box from micron to data base units
-	info.target.xmin = (int64_t)(target.xmin / dbunit_in_um);
-	info.target.ymin = (int64_t)(target.ymin / dbunit_in_um);
-	info.target.xmax = (int64_t)(target.xmax / dbunit_in_um);
-	info.target.ymax = (int64_t)(target.ymax / dbunit_in_um);
+	info.target = target;
 
 	// Convert the target resolution from micron to data base units
-	info.resolution = (int64_t)(resolution / dbunit_in_um);
+	info.resolution = resolution;
 
 	// Initial transformation
 
 	gds_transform transfrom;
-	transfrom.translation = (gds_pair) {0, 0};
+	transfrom.translation = {0, 0};
 	transfrom.magnification = 1.f;
 	transfrom.angle = 0.f;
 	transfrom.mirror = 0x0000;
@@ -231,13 +223,13 @@ gds_error gds_extract(gds_db* db, const char* cell_name, gds_bbox target, double
 		return ERR_MAX_POLYS;
 	}
 
-	if (info.pset->length == 0)
+	if (info.pset->size() == 0)
 	{
 		printf("--> No polygons found\n");
 		return ERR_NO_POLYS_FOUND;
 	} else
 	{
-		printf("--> Found %d polygons\n", info.pset->length);
+		printf("--> Found %lld polygons\n", info.pset->size());
 	}
 
 	*nskipped = info.nskipped;

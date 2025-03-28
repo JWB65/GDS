@@ -1,6 +1,6 @@
-#include "gds.h"
+#include "Gds.h"
 
-#include "gds_records.h"
+#include "Records.h"
 
 #include <assert.h>
 #include <math.h>
@@ -164,7 +164,7 @@ static void append_boundary(FILE* file, const gds_pair* p, int npairs, uint16_t 
 	/* Add boundary element to GDS file */
 
 	// Allocate the buffer
-	char* buf = malloc(npairs * 8 * sizeof(char));
+	char* buf = (char *) malloc(npairs * 8 * sizeof(char));
 
 	for (int i = 0; i < npairs; i++)
 	{
@@ -185,7 +185,7 @@ static void append_boundary(FILE* file, const gds_pair* p, int npairs, uint16_t 
 	free(buf);
 }
 
-int gds_write(const wchar_t* dest, List* pset, double dbunit_size_uu, double dbunit_size_in_m)
+int gds_write(const wchar_t* dest, gds_polyset* pset, double dbunit_size_uu, double dbunit_size_in_m)
 {
 	/* Write polygon set to a file */
 
@@ -214,9 +214,8 @@ int gds_write(const wchar_t* dest, List* pset, double dbunit_size_uu, double dbu
 	append_byte(fp, BGNSTR, zeros, 24);
 	append_string(fp, STRNAME, "TOP");
 
-	for (int i = 0, size = pset->length; i < size; i++)
+	for (gds_polygon* poly : *pset)
 	{
-		gds_polygon* poly = list_at(pset, i);
 		append_boundary(fp, poly->pairs, poly->npairs, poly->layer);
 	}
 

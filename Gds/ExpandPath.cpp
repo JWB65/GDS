@@ -31,7 +31,7 @@ intersect_lines(Line line1, Line line2)
 	double x = (line1.b * line2.c - line2.b * line1.c) / w;
 	double y = (line2.a * line1.c - line1.a * line2.c) / w;
 
-	return (gds_pair) { (int)x, (int)y };
+	return { (int)x, (int)y };
 }
 
 static gds_pair
@@ -41,9 +41,7 @@ project(gds_pair p, Line line)
 	// A'x + B'y + C' = 0 with
 	// A' = B  B' = -A  C' = Ay1 - Bx1
 
-	//Line normal(line.b, -line.a, line.a * p.y - line.b * p.x);
-
-	Line normal = {.a = line.b, .b = -line.a, .c = line.a * p.y - line.b * p.x};
+	Line normal = {line.b, -line.a, line.a * p.y - line.b * p.x};
 
 	//normal.a = line.b;
 	//normal.b = -line.a;

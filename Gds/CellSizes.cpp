@@ -1,4 +1,5 @@
-#include "gds.h"
+#include "Gds.h"
+//#include "gds_cell.h"
 
 #include <inttypes.h>
 #include <stdio.h>
@@ -14,17 +15,18 @@ cell_sizes_recurse(gds_cell* cell, gds_transform transform, unsigned int level)
 
 	gds_bbox bbox_cell;
 	bbox_init(&bbox_cell);
-	bbox_fit_point(&bbox_cell, (gds_pair) {0, 0});
+	bbox_fit_point(&bbox_cell, {0, 0});
 
-	for (int i = 0; i < cell->boundaries->length; i++)
+	//for (int i = 0; i < cell->boundaries.size(); i++)
+	for (gds_boundary* b : *cell->boundaries)
 	{
-		gds_boundary* b = list_at(cell->boundaries, i);
+		//gds_boundary* b = (gds_boundary*)cell->boundaries[i];
 		bbox_fit_bbox(&bbox_cell, &b->bbox);
 	}
 
-	for (int i = 0; i < cell->paths->length; i++)
+	for (gds_path* p : *cell->paths)
 	{
-		gds_path* p = list_at(cell->paths, i);
+		//gds_path* p = (gds_path*)cell->paths[i];
 		bbox_fit_bbox(&bbox_cell, &p->bbox);
 	}
 
@@ -32,9 +34,9 @@ cell_sizes_recurse(gds_cell* cell, gds_transform transform, unsigned int level)
 	bbox_transform(&bbox_cell, &transform, false);
 
 	// Update the bounding box to fit all gds_sref elements
-	for (int i = 0; i < cell->srefs->length; i++)
+	for (gds_sref* sref : *cell->srefs)
 	{
-		gds_sref* sref = list_at(cell->srefs, i);
+		//gds_sref* sref = (gds_sref*)cell->srefs[i];
 
 		gds_transform acc;
 		acc.translation = transform_pair(sref->origin, &transform, false);
@@ -48,9 +50,9 @@ cell_sizes_recurse(gds_cell* cell, gds_transform transform, unsigned int level)
 		bbox_fit_bbox(&bbox_cell, &tmp); // adjust the bounding box
 	}
 
-	for (int i = 0; i < cell->arefs->length; i++)
+	for (gds_aref* aref : *cell->arefs)
 	{
-		gds_aref* aref = list_at(cell->arefs, i);
+		//gds_aref* aref = (gds_aref*)cell->arefs[i];
 
 		double v_col_x, v_col_y, v_row_x, v_row_y;
 
@@ -80,7 +82,7 @@ cell_sizes_recurse(gds_cell* cell, gds_transform transform, unsigned int level)
 				int64_t y_ref = (int64_t)(y1 + c * v_col_y + r * v_row_y);
 
 				gds_transform acc;
-				acc.translation = transform_pair((gds_pair) { x_ref, y_ref }, & transform, false);
+				acc.translation = transform_pair({ x_ref, y_ref }, & transform, false);
 				acc.magnification = transform.magnification * aref->mag;
 				acc.angle = transform.angle + aref->angle;
 				acc.mirror = transform.mirror ^ (aref->strans & 0x8000);
@@ -106,18 +108,18 @@ void gds_cell_sizes(gds_db* db)
 
 	printf("\nAll cells in database with width and height in database units:\n");
 
-	for (int i = 0; i < db->cell_list->length; i++)
+	for (int i = 0; i < db->cell_list.size(); i++)
 	{
-		gds_cell* cell = list_at(db->cell_list, i);
+		gds_cell* cell = db->cell_list[i];
 
 		gds_transform transform;
-		transform.translation = (gds_pair) {0, 0};
+		transform.translation = {0, 0};
 		transform.magnification = 1.f;
 		transform.angle = 0.f;
 		transform.mirror = 0x0000;
 
 		gds_bbox box = cell_sizes_recurse(cell, transform, 0);
 
-		printf("%s: %"PRId64" by %"PRId64"\n", cell->name, box.xmax - box.ymin, box.ymax - box.ymin);
+		printf("%s: %lld by %lld\n", cell->name, box.xmax - box.ymin, box.ymax - box.ymin);
 	}
 }
